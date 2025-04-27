@@ -70,7 +70,8 @@ check_success
 notify "System time synced ✅"
 
 # ---- MENU ----
-exec 1>&3  # Bring output back to screen
+exec 1>&3  # Temporarily bring output back to screen
+
 options=("Gaming Usage" "Work Usage" "Sysadmin Usage" "All of the Above")
 select opt in "${options[@]}"; do
     if [[ -n "$opt" ]]; then
@@ -80,7 +81,8 @@ select opt in "${options[@]}"; do
         error "Invalid option. Please select 1-${#options[@]}."
     fi
 done
-exec 3>&1 1>>"$LOGFILE" 2>&1  # Silence again
+
+exec 3>&1 1>>"$LOGFILE" 2>&1  # Silence again after selection
 
 # ---- CORE FUNCTIONS ----
 
