@@ -26,7 +26,7 @@ spinner() {
     local delay=0.1
     local spinstr='-|/\\'
     while kill -0 "$pid" 2>/dev/null; do
-        for char in "+" "-"; do
+        for char in '+' '-'; do
             printf " [%c]  " "$char"
             sleep $delay
             printf "\b\b\b\b\b\b"
@@ -126,25 +126,38 @@ install_gaming() {
     run "sudo add-apt-repository -y ppa:lutris-team/lutris && sudo apt update && sudo apt install -y lutris"
     run "flatpak install -y flathub com.heroicgameslauncher.hgl"
     run "sudo apt install -y gnome-tweaks fancontrol openrgb"
-    run "flatpak install -y flathub com.parsecgaming.parsec"
+    run "flatpak install -y flathub com.parsecgaming.parsec"             # Parsec :contentReference[oaicite:5]{index=5}
+    run "flatpak install -y flathub me.proton.Mail"                       # Proton Mail :contentReference[oaicite:6]{index=6}
+    run "flatpak install -y flathub com.protonvpn.www"                    # Proton VPN :contentReference[oaicite:7]{index=7}
+    run "flatpak install -y flathub me.proton.Pass"                       # Proton Pass :contentReference[oaicite:8]{index=8}
+    run "sudo snap install onlyoffice-desktopeditors"                     # OnlyOffice snap :contentReference[oaicite:9]{index=9}
 }
 
 install_work() {
     notify_user "Starting Work environment install"
     run "sudo snap install cohesion-desktop spotify signal-desktop"
     run "sudo apt install -y zen-browser"
-    run "sudo apt install -y onlyoffice-desktopeditors"
-    run "flatpak install -y flathub ch.protonmail.protonmail-bridge ch.protonmail.proton-drive org.freedesktop.Piper"
+    run "flatpak install -y flathub com.parsecgaming.parsec"             # Parsec :contentReference[oaicite:10]{index=10}
+    run "flatpak install -y flathub me.proton.Mail"                       # Proton Mail :contentReference[oaicite:11]{index=11}
+    run "flatpak install -y flathub com.protonvpn.www"                    # Proton VPN :contentReference[oaicite:12]{index=12}
+    run "flatpak install -y flathub me.proton.Pass"                       # Proton Pass :contentReference[oaicite:13]{index=13}
+    run "sudo snap install onlyoffice-desktopeditors"                     # OnlyOffice snap :contentReference[oaicite:14]{index=14}
 }
 
 install_sysadmin() {
     notify_user "Starting Sysadmin environment install"
+    run "sudo snap install spotify zen-browser"    # Spotify & Zen Browser
     run "sudo snap install winbox"
     run "flatpak install -y flathub com.burpsuite.BurpSuiteCommunity"
+    run "flatpak install -y flathub com.parsecgaming.parsec"             # Parsec :contentReference[oaicite:15]{index=15}
+    run "flatpak install -y flathub me.proton.Mail"                       # Proton Mail :contentReference[oaicite:16]{index=16}
+    run "flatpak install -y flathub com.protonvpn.www"                    # Proton VPN :contentReference[oaicite:17]{index=17}
+    run "flatpak install -y flathub me.proton.Pass"                       # Proton Pass :contentReference[oaicite:18]{index=18}
     run "echo 'wireshark-common wireshark-common/install-setuid boolean true' | sudo debconf-set-selections"
     run "sudo apt install -y nmap wireshark"
     run "sudo apt install -y docker.io virtualbox"
     run "sudo docker volume create portainer_data && sudo docker run -d -p 9000:9000 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce"
+    run "sudo snap install onlyoffice-desktopeditors"                     # OnlyOffice snap :contentReference[oaicite:19]{index=19}
 }
 
 cleanup() {
@@ -153,9 +166,12 @@ cleanup() {
 
 # ---- MAIN LOGIC ----
 install_dependencies
-install_amd_drivers  # Install AMD drivers
+install_amd_drivers
 case "$CHOICE" in
-    1) install_gaming ;; 2) install_work ;; 3) install_sysadmin ;; 4)
+    1) install_gaming ;;
+    2) install_work ;;
+    3) install_sysadmin ;;
+    4)
         install_gaming
         install_work
         install_sysadmin
