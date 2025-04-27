@@ -39,6 +39,23 @@ check_success() {
     fi
 }
 
+# ---- SPINNER FUNCTION ----
+spinner() {
+    local pid=$!
+    local delay=0.1
+    local spinstr='-\|/'
+    local temp
+    while true; do
+        temp="${spinstr#?}"
+        printf " [%c]  " "${spinstr%"$temp"}"
+        spinstr="$temp${spinstr%"$temp"}"
+        sleep $delay
+        kill -0 "$pid" 2>/dev/null || break
+        printf "\r"
+    done
+    printf "    \r"
+}
+
 # ---- TIME SYNC FUNCTION ----
 info "🌐 Syncing system time with NTP..."
 (sudo timedatectl set-ntp true && sudo ntpdate -u pool.ntp.org) & spinner
