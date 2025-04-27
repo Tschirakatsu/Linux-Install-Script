@@ -70,7 +70,8 @@ check_success
 notify "System time synced ✅"
 
 # ---- MENU ----
-exec 1>&3  # Temporarily bring output back to screen
+clear
+echo -e "${BLUE}Please select an option below:${NC}"
 
 options=("Gaming Usage" "Work Usage" "Sysadmin Usage" "All of the Above")
 select opt in "${options[@]}"; do
@@ -81,8 +82,6 @@ select opt in "${options[@]}"; do
         error "Invalid option. Please select 1-${#options[@]}."
     fi
 done
-
-exec 3>&1 1>>"$LOGFILE" 2>&1  # Silence again after selection
 
 # ---- CORE FUNCTIONS ----
 
@@ -125,8 +124,8 @@ install_gaming() {
     (sudo snap install spotify discord) & spinner
     check_success
 
-    info "Installing Zen Browser (Brave)..."
-    (sudo apt install -y brave-browser) & spinner
+    info "Installing Zen Browser..."
+    (sudo apt install -y zen-browser) & spinner
     check_success
 
     info "Installing Steam via Flatpak..."
@@ -158,8 +157,8 @@ install_work() {
     (sudo snap install cohesion-desktop spotify signal-desktop) & spinner
     check_success
 
-    info "Installing Zen Browser (Brave)..."
-    (sudo apt install -y brave-browser) & spinner
+    info "Installing Zen Browser..."
+    (sudo apt install -y zen-browser) & spinner
     check_success
 
     info "Installing OnlyOffice..."
