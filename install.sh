@@ -60,7 +60,17 @@ clear
 figlet -f slant "Pop!_OS Setup" | lolcat
 info "Welcome to your Pop! Post Install Party!"
 
+# ---- TIME SYNC FUNCTION ----
+info "🌐 Syncing system time with NTP..."
+notify "Syncing system time..."
+
+(sudo timedatectl set-ntp true && sudo ntpdate -u pool.ntp.org) & spinner
+
+check_success
+notify "System time synced ✅"
+
 # ---- MENU ----
+exec 1>&3  # Bring output back to screen
 options=("Gaming Usage" "Work Usage" "Sysadmin Usage" "All of the Above")
 select opt in "${options[@]}"; do
     if [[ -n "$opt" ]]; then
@@ -70,6 +80,7 @@ select opt in "${options[@]}"; do
         error "Invalid option. Please select 1-${#options[@]}."
     fi
 done
+exec 3>&1 1>>"$LOGFILE" 2>&1  # Silence again
 
 # ---- CORE FUNCTIONS ----
 
