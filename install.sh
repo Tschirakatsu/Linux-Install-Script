@@ -35,6 +35,7 @@ check_success() {
         success "Done!"
     else
         error "Error encountered! Check $LOGFILE."
+        exit 1
     fi
 }
 
