@@ -74,7 +74,10 @@ install_sysadmin() {
     wget -O jetbrains-toolbox.tar.gz "https://download.jetbrains.com/toolbox/jetbrains-toolbox-1.27.2.12534.tar.gz"
     tar -xzf jetbrains-toolbox.tar.gz -C /tmp
     /tmp/jetbrains-toolbox*/jetbrains-toolbox --no-sandbox &
-    sudo apt install -y nmap wireshark
+    sudo apt install -y nmap 
+    # Install Wireshark non-interactively
+echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
+sudo apt install -y wireshark
     wget -O ~/burpsuite-community.sh "https://portswigger-cdn.net/burp/releases/download?product=community&version=2025.3&type=Linux" && chmod +x ~/burpsuite-community.sh && bash ~/burpsuite-community.sh
     sudo apt install -y docker.io virtualbox
     sudo docker volume create portainer_data
