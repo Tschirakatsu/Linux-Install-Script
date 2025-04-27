@@ -104,9 +104,17 @@ while true; do
 done
 
 # ---- INSTALL FUNCTIONS ----
+
+# Install AMD GPU & CPU drivers (for Ryzen 7 7800X3D)
+install_amd_drivers() {
+    run "sudo apt install -y linux-headers-$(uname -r)"
+    run "sudo apt install -y amdgpu-pro"
+}
+
 install_dependencies() {
     run "sudo apt install -y pipewire pipewire-audio-client-libraries wireplumber libspa-0.2-bluetooth libspa-0.2-jack"
     run "sudo apt remove -y pulseaudio pulseaudio-utils pulseaudio-module-bluetooth"
+    run "sudo apt install -y easyeffects"
     run "sudo apt install -y conky-all lm-sensors"
 }
 
@@ -145,6 +153,7 @@ cleanup() {
 
 # ---- MAIN LOGIC ----
 install_dependencies
+install_amd_drivers  # Install AMD drivers
 case "$CHOICE" in
     1) install_gaming ;; 2) install_work ;; 3) install_sysadmin ;; 4)
         install_gaming
