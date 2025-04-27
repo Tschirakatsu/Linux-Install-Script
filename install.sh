@@ -14,9 +14,9 @@ YELLOW="\033[1;33m"
 NC="\033[0m" # No Color
 
 # ---- CLEAN OUTPUT FUNCTIONS ----
-info() { echo -e "${BLUE}[INFO]${NC} $1" >&3; }
-success() { echo -e "${GREEN}[SUCCESS]${NC} $1" >&3; }
-error() { echo -e "${RED}[ERROR]${NC} $1" >&3; }
+info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # ---- VERBOSE OR NOT ----
 if [[ "$1" == "-v" || "$1" == "--verbose" ]]; then
@@ -29,7 +29,7 @@ fi
 
 # ---- REQUIREMENTS CHECK ----
 sudo apt update -qq
-sudo apt install -y figlet lolcat curl wget flatpak gnome-software-plugin-flatpak snapd libnotify-bin > /dev/null 2>&1
+sudo apt install -y figlet lolcat curl wget flatpak gnome-software-plugin-flatpak snapd libnotify-bin dbus ntpdate > /dev/null 2>&1
 
 mkdir -p "$TMP_DIR"
 sudo touch "$LOGFILE"
