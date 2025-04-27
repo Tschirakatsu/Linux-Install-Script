@@ -57,33 +57,43 @@ fi
 
 # --- Helper: Flatpak first, fallback APT ---
 install_app() {
-  local name="$1" fpkg="$2" apk="$3"
+  local name="$1"
+  local fpkg="$2"
+  local apk="$3"
   log "Processing $name..."
-  # Check Flatpak installation
-  if [[ -n "$fpkg" ]]; then
-    if flatpak info "$fpkg" &>/dev/null; then
+
+  # If no package targets provided, skip
+  if [ -z "$fpkg" ] && [ -z "$apk" ]; then
+    log "No installation targets for $name, skipping."
+    return
+  fi
+
+  # Flatpak check & install
+  if [ -n "$fpkg" ]; then
+    if flatpak info "$fpkg" >/dev/null 2>&1; then
       log "$name (Flatpak) already installed"
       return
     fi
-  fi
-  # Try Flatpak
-  if [[ -n "$fpkg" ]]; then
     log_verbose "Attempting Flatpak install: $fpkg"
     if flatpak install flathub "$fpkg" -y >>"$VERBOSE_LOG" 2>&1; then
       log "$name installed via Flatpak"
       return
     else
-      log "$name Flatpak install failed, will try APT..."
+      log "$name Flatpak install failed, will try APT"
     fi
   fi
-  # Fallback to APT
-  if [[ -n "$apk" ]]; then
-    if dpkg -s "$apk" &>/dev/null; then
+
+  # APT fallback
+  if [ -n "$apk" ]; then
+    if dpkg -s "$apk" >/dev/null 2>&1; then
       log "$name (APT) already installed"
     else
       log "Installing $name via APT..."
-      apt-get install -y "$apk" >>"$VERBOSE_LOG" 2>&1
-      if [[ $? -eq 0 ]]; then log "$name installed via APT"; else log "Error installing $name via APT"; fi
+      if apt-get install -y "$apk" >>"$VERBOSE_LOG" 2>&1; then
+        log "$name installed via APT"
+      else
+        log "Error installing $name via APT"
+      fi
     fi
   fi
 }
