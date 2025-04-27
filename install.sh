@@ -6,10 +6,17 @@ TMP_DIR="/tmp/post_install_tmp"
 INSTALL_OK="✅"
 INSTALL_FAIL="❌"
 
+# ---- COLORS ----
+GREEN="\033[1;32m"
+RED="\033[1;31m"
+BLUE="\033[1;34m"
+YELLOW="\033[1;33m"
+NC="\033[0m" # No Color
+
 # ---- CLEAN OUTPUT FUNCTIONS ----
-info() { echo -e "\e[1;34m[INFO]\e[0m $1" >&3; }
-success() { echo -e "\e[1;32m[SUCCESS]\e[0m $1" >&3; }
-error() { echo -e "\e[1;31m[ERROR]\e[0m $1" >&3; }
+info() { echo -e "${BLUE}[INFO]${NC} $1" >&3; }
+success() { echo -e "${GREEN}[SUCCESS]${NC} $1" >&3; }
+error() { echo -e "${RED}[ERROR]${NC} $1" >&3; }
 
 # ---- VERBOSE OR NOT ----
 if [[ "$1" == "-v" || "$1" == "--verbose" ]]; then
@@ -20,13 +27,33 @@ else
     exec 3>&1 1>>"$LOGFILE" 2>&1
 fi
 
-# ---- BASIC SETUP ----
+# ---- REQUIREMENTS CHECK ----
 sudo apt update -qq
-sudo apt install -y figlet lolcat curl wget flatpak gnome-software-plugin-flatpak snapd
+sudo apt install -y figlet lolcat curl wget flatpak gnome-software-plugin-flatpak snapd libnotify-bin > /dev/null 2>&1
 
 mkdir -p "$TMP_DIR"
 sudo touch "$LOGFILE"
 sudo chmod 644 "$LOGFILE"
+
+# ---- SPINNER FUNCTION ----
+spinner() {
+    local pid=$!
+    local delay=0.1
+    local spinstr='|/-\'
+    while ps -p $pid > /dev/null; do
+        local temp=${spinstr#?}
+        printf " [%c]  " "$spinstr"
+        local spinstr=$temp${spinstr%"$temp"}
+        sleep $delay
+        printf "\b\b\b\b\b\b"
+    done
+    printf "    \b\b\b\b"
+}
+
+# ---- NOTIFICATION FUNCTION ----
+notify() {
+    notify-send -u normal "Pop! Installer" "$1"
+}
 
 # ---- BANNER ----
 clear
@@ -44,7 +71,7 @@ select opt in "${options[@]}"; do
     fi
 done
 
-# ---- FUNCTIONS ----
+# ---- CORE FUNCTIONS ----
 
 check_success() {
     if [ $? -eq 0 ]; then
@@ -55,106 +82,116 @@ check_success() {
 }
 
 install_dependencies() {
-    info "Installing core dependencies and updates..."
-    sudo apt update && sudo apt full-upgrade -y
+    info "🔄 Updating system packages..."
+    notify "Updating system packages..."
+
+    (sudo apt update -y && sudo apt full-upgrade -y) & spinner
+
     check_success
+    notify "System update complete ✅"
 
     info "Replacing PulseAudio with PipeWire..."
-    sudo apt install -y pipewire pipewire-audio-client-libraries wireplumber libspa-0.2-bluetooth libspa-0.2-jack
-    sudo apt remove -y pulseaudio pulseaudio-utils pulseaudio-module-bluetooth
-    check_success
+    notify "Replacing PulseAudio with PipeWire..."
 
-    sudo apt install -y conky-all lm-sensors
+    (sudo apt install -y pipewire pipewire-audio-client-libraries wireplumber libspa-0.2-bluetooth libspa-0.2-jack \
+        && sudo apt remove -y pulseaudio pulseaudio-utils pulseaudio-module-bluetooth) & spinner
+
+    check_success
+    notify "PipeWire set up successfully 🎵"
+
+    info "Installing Conky + lm-sensors..."
+    (sudo apt install -y conky-all lm-sensors) & spinner
     check_success
 }
 
 install_gaming() {
     info "🎮 Setting up Gaming Environment..."
+    notify "Installing Gaming Environment..."
 
     info "Installing Spotify and Discord..."
-    sudo snap install spotify discord
+    (sudo snap install spotify discord) & spinner
     check_success
 
     info "Installing Zen Browser (Brave)..."
-    sudo apt install -y brave-browser
+    (sudo apt install -y brave-browser) & spinner
     check_success
 
     info "Installing Steam via Flatpak..."
-    flatpak install -y flathub com.valvesoftware.Steam
+    (flatpak install -y flathub com.valvesoftware.Steam) & spinner
     check_success
 
     info "Installing Lutris..."
-    sudo add-apt-repository -y ppa:lutris-team/lutris
-    sudo apt update -qq
-    sudo apt install -y lutris
+    (sudo add-apt-repository -y ppa:lutris-team/lutris && sudo apt update && sudo apt install -y lutris) & spinner
     check_success
 
     info "Installing Heroic Games Launcher..."
-    flatpak install -y flathub com.heroicgameslauncher.hgl
+    (flatpak install -y flathub com.heroicgameslauncher.hgl) & spinner
     check_success
 
-    info "Installing Gnome Tweaks, OpenRGB, Fan Control..."
-    sudo apt install -y gnome-tweaks fancontrol openrgb
+    info "Installing Gnome Tweaks, Fan Control, OpenRGB..."
+    (sudo apt install -y gnome-tweaks fancontrol openrgb) & spinner
     check_success
 
     info "Installing Parsec via Flatpak..."
-    flatpak install -y flathub com.parsecgaming.parsec
+    (flatpak install -y flathub com.parsecgaming.parsec) & spinner
     check_success
 }
 
 install_work() {
     info "💼 Setting up Work Environment..."
+    notify "Installing Work Environment..."
 
-    info "Installing Cohesion, Spotify, and Signal..."
-    sudo snap install cohesion-desktop spotify signal-desktop
+    info "Installing Cohesion, Spotify, Signal..."
+    (sudo snap install cohesion-desktop spotify signal-desktop) & spinner
     check_success
 
     info "Installing Zen Browser (Brave)..."
-    sudo apt install -y brave-browser
+    (sudo apt install -y brave-browser) & spinner
     check_success
 
     info "Installing OnlyOffice..."
-    sudo apt install -y onlyoffice-desktopeditors
+    (sudo apt install -y onlyoffice-desktopeditors) & spinner
     check_success
 
     info "Installing Proton Suite via Flatpak..."
-    flatpak install -y ch.protonmail.protonmail-bridge ch.protonmail.proton-drive org.freedesktop.Piper
+    (flatpak install -y ch.protonmail.protonmail-bridge ch.protonmail.proton-drive org.freedesktop.Piper) & spinner
     check_success
 }
 
 install_sysadmin() {
     info "🛠️ Setting up Sysadmin Environment..."
+    notify "Installing Sysadmin Environment..."
 
     info "Installing Winbox via Snap..."
-    sudo snap install winbox
+    (sudo snap install winbox) & spinner
     check_success
 
     info "Installing Burp Suite Community via Flatpak..."
-    flatpak install -y com.burpsuite.BurpSuiteCommunity
+    (flatpak install -y com.burpsuite.BurpSuiteCommunity) & spinner
     check_success
 
     info "Pre-configuring Wireshark to install non-interactively..."
     echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 
     info "Installing Nmap and Wireshark..."
-    sudo apt install -y nmap wireshark
+    (sudo apt install -y nmap wireshark) & spinner
     check_success
 
     info "Installing Docker and VirtualBox..."
-    sudo apt install -y docker.io virtualbox
+    (sudo apt install -y docker.io virtualbox) & spinner
     check_success
 
     info "Setting up Portainer container..."
-    sudo docker volume create portainer_data
+    (sudo docker volume create portainer_data && \
     sudo docker run -d -p 9000:9000 --name portainer --restart=always \
         -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data \
-        portainer/portainer-ce
+        portainer/portainer-ce) & spinner
     check_success
 }
 
 cleanup() {
     info "🧹 Cleaning up temp files..."
-    rm -rf "$TMP_DIR"
+    (rm -rf "$TMP_DIR") & spinner
     check_success
 }
 
@@ -185,6 +222,7 @@ esac
 
 cleanup
 
-info "🎉 All selected packages installed! Rebooting in 10 seconds..."
+notify "🎉 All selected packages installed! System will reboot soon!"
+info "🎉 All done! Rebooting in 10 seconds..."
 sleep 10
 sudo reboot
